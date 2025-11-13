@@ -178,36 +178,133 @@ const router = express.Router();
 // });
 
 //-------------
-// 🟢 Configure Brevo API
-const defaultClient = SibApiV3Sdk.ApiClient.instance;
-const apiKey = defaultClient.authentications["api-key"];
-apiKey.apiKey = process.env.BREVO_API_KEY;
-
-// 📨 Helper function to send verification email
-const sendVerificationEmail = async (email, username, verifyUrl) => {
-  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-  try {
-    await apiInstance.sendTransacEmail({
-      sender: { email: "no-reply@kalpquiz.com", name: "KalpQuiz" },
-      to: [{ email }],
-      subject: "Verify your KalpQuiz email",
-      htmlContent: `
-        <h3>Hi ${username}, Welcome to KalpQuiz!</h3>
-        <p>Click the link below to verify your email:</p>
-        <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
-        <p>If you didn’t request this, please ignore this email.</p>
-      `,
-    });
-    console.log("✅ Verification email sent via Brevo API to:", email);
-  } catch (err) {
-    console.error("❌ Brevo email error:", err.message);
-    throw err;
-  }
-};
 
 // 🧩 Signup route
+// router.post("/signup", async (req, res) => {
+//   const { email, password, username } = req.body;
+//   // 🟢 Configure Brevo API
+// const defaultClient = SibApiV3Sdk.ApiClient.instance;
+// const apiKey = defaultClient.authentications["api-key"];
+// apiKey.apiKey = process.env.BREVO_API_KEY;
+// console.log(apiKey.apiKey)
+
+// // 📨 Helper function to send verification email
+// const sendVerificationEmail = async (email, username, verifyUrl) => {
+//   const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+//   try {
+//     await apiInstance.sendTransacEmail({
+//       sender: { email: "no-reply@kalpquiz.com", name: "KalpQuiz" },
+//       to: [{ email }],
+//       subject: "Verify your KalpQuiz email",
+//       htmlContent: `
+//         <h3>Hi ${username}, Welcome to KalpQuiz!</h3>
+//         <p>Click the link below to verify your email:</p>
+//         <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
+//         <p>If you didn’t request this, please ignore this email.</p>
+//       `,
+//     });
+//     console.log("✅ Verification email sent via Brevo API to:", email);
+//   } catch (err) {
+//     console.error("❌ Brevo email error:", err.message);
+//     throw err;
+//   }
+// };
+
+
+//   try {
+//     const exists = await User.findOne({ email });
+//     if (exists) return res.status(400).json({ message: "Email already exists" });
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const verificationToken = crypto.randomBytes(32).toString("hex");
+
+//     const newUser = new User({
+//       email,
+//       password: hashedPassword,
+//       isVerified: false,
+//       verificationToken,
+//       username,
+//     });
+
+//     await newUser.save();
+
+//     const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
+//     console.log("📨 Verify link:", verifyUrl);
+
+//     // Send email via Brevo API
+//     await sendVerificationEmail(email, username, verifyUrl);
+
+//     res.status(201).json({ message: "Signup successful! Please verify your email." });
+//   } catch (err) {
+//     console.error("❌ Signup error:", err.message);
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// });
+
+//----------------------------
 router.post("/signup", async (req, res) => {
   const { email, password, username } = req.body;
+
+  
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const apiKey = defaultClient.authentications["api-key"];
+  apiKey.apiKey = process.env.BREVO_API_KEY;
+
+  // console.log("BREVO KEY:", apiKey.apiKey);
+
+  const sendVerificationEmail = async (email, username, verifyUrl) => {
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    try {
+      await apiInstance.sendTransacEmail({
+        sender: { email: "kalpquiz@gmail.com", name: "KalpQuiz" },
+        to: [{ email }],
+        subject: "Verify your KalpQuiz email",
+        // htmlContent: `
+        //   <h3>Hi ${username}, Welcome to KalpQuiz!</h3>
+        //   <p>Click the link below to verify your email:</p>
+        //   <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
+        // `,
+        htmlContent: `
+  <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2 style="color: #4CAF50;">Welcome to KalpQuiz, ${username}!</h2>
+
+    <p>Thank you for creating an account with <strong>KalpQuiz</strong>.</p>
+
+    <p>To complete your registration and activate your account, please verify your email address by clicking the button below:</p>
+
+    <div style="margin: 25px 0;">
+      <a href="${verifyUrl}" target="_blank" 
+         style="
+           background-color: #4CAF50;
+           color: white;
+           padding: 12px 20px;
+           text-decoration: none;
+           border-radius: 6px;
+           font-size: 16px;
+         ">
+        Verify Email Address
+      </a>
+    </div>
+
+    <p>If the button above doesn’t work, copy and paste the link below into your browser:</p>
+    <p style="word-break: break-all;">
+      <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
+    </p>
+
+    <p>If you did not create this account, you can safely ignore this email.</p>
+
+    <br>
+    <p>Best regards,<br><strong>The KalpQuiz Team</strong></p>
+  </div>`
+      });
+
+      console.log("📩 Email sent to:", email);
+    } catch (err) {
+      console.error("❌ Brevo Error:", err.message);
+      throw err;
+    }
+  };
 
   try {
     const exists = await User.findOne({ email });
@@ -227,19 +324,18 @@ router.post("/signup", async (req, res) => {
     await newUser.save();
 
     const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
-    console.log("📨 Verify link:", verifyUrl);
+    console.log("Verify URL:", verifyUrl);
 
-    // Send email via Brevo API
     await sendVerificationEmail(email, username, verifyUrl);
 
-    res.status(201).json({ message: "Signup successful! Please verify your email." });
+    res.status(201).json({ message: "Signup successful! Check your email." });
+
   } catch (err) {
-    console.error("❌ Signup error:", err.message);
+    console.error("❌ Signup Error:", err.message);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-//----------------------------
 
 
 
