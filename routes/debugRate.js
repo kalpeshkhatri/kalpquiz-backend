@@ -104,7 +104,7 @@ export default router;
 
 
 //have aapne admin panel ma aa Redis na data display thay tene mate aapne aa route banavyo 6e. je only admin j dekhi sakse.
-//  http://localhost:5000/debug/rate-limits
+//  https://kalpquiz-backend.onrender.com/debug/rate-limits
 
 
 

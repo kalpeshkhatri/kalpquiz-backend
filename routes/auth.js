@@ -71,7 +71,7 @@ const router = express.Router();
 //     });
 
     
-//     const verifyUrl = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+//     const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
 
 //     await transporter.sendMail({
 //       from: '"KalpQuiz" <no-reply@kalpquiz.com>',
@@ -125,7 +125,7 @@ router.post('/signup', async (req, res) => {
       }
     });
 
-    const verifyUrl = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+    const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
     console.log('📨 Verify link:', verifyUrl);
 
     await transporter.sendMail({
@@ -336,7 +336,7 @@ router.post('/reset-password', async (req, res) => {
 
 //------------------------------------------------------
 
-// aapne aa main (http://localhost:5000) na jode aa user route joday gayu. pa6i have aa protectedRoute profile pan joday gayu. aa profile ma ek jai sakse ke jeni pase JWT valid token hase . tene valid karvanu kam aa middleware nu 6e je jwt token mahi user ni detail ne  decode kare 6e.
+// aapne aa main (https://kalpquiz-backend.onrender.com) na jode aa user route joday gayu. pa6i have aa protectedRoute profile pan joday gayu. aa profile ma ek jai sakse ke jeni pase JWT valid token hase . tene valid karvanu kam aa middleware nu 6e je jwt token mahi user ni detail ne  decode kare 6e.
 
 
 

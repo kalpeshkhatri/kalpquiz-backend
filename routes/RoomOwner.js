@@ -86,7 +86,7 @@ router.post('/createRoom', authenticateToken,async (req, res) => {
     //   }
     // });
 
-    // const verifyUrl = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+    // const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
     // console.log('📨 Verify link:', verifyUrl);
 
     // await transporter.sendMail({
