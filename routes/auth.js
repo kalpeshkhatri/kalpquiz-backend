@@ -7,6 +7,8 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 dotenv.config();
 
+
+
 // import User from '../backend/models/User.js';
 
 const router = express.Router();
@@ -91,20 +93,127 @@ const router = express.Router();
 //   }
 // });
 //--------------
-router.post('/signup', async (req, res) => {
-  const { email, password, username } = req.body;
+
+
+
+//------------------------------------------------------------------13 november 2015
+
+// router.post('/signup', async (req, res) => {
+//   const { email, password, username } = req.body;
 
   
+//     const exists = await User.findOne({ email });
+//     console.log('hello');
+//     if (exists) return res.status(400).json({ message: 'Email already exists' });
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     console.log('📩 Email:', email);
+
+//     // ✅ Declare here — outside try block
+//     const verificationToken = crypto.randomBytes(32).toString('hex');
+//     console.log('🔐 Token:', verificationToken);
+
+//     const newUser = new User({
+//       email,
+//       password: hashedPassword,
+//       isVerified: false,
+//       verificationToken,
+//       username,
+//     });
+//     console.log('💾 New user:', newUser);
+
+//     await newUser.save();
+
+//     const transporter = nodemailer.createTransport({
+//       host: "smtp-relay.brevo.com",
+//       port: 587,
+//       auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS
+//       }
+//     });
+
+//     const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
+//     console.log('📨 Verify link:', verifyUrl);
+//   //   try{
+//   //   await transporter.sendMail({
+//   //     from: '"KalpQuiz" <no-reply@kalpquiz.com>',
+//   //     to: email,
+//   //     subject: 'Verify your KalpQuiz email',
+//   //     html: `
+//   //       <h3>${username},Welcome to KalpQuiz!</h3>
+//   //       <p>Click the link below to verify your email address:</p>
+//   //       <a href="${verifyUrl}">${verifyUrl}</a>
+//   //       <p>If you did not request this, ignore this email.</p>
+//   //     `
+//   //   });
+
+//   //   res.status(201).json({ message: 'Signup successful! Please verify your email.' });
+//   // } catch (err) {
+//   //   console.error('❌ Signup error:', err.message);
+//   //   res.status(500).json({ message: 'Server error', error: err.message });
+//   // }
+//   try {
+//   await transporter.sendMail({
+//     from: '"KalpQuiz" <no-reply@kalpquiz.com>',
+//     to: email,
+//     subject: 'Verify your KalpQuiz email',
+//     html: `
+//       <h3>${username}, Welcome to KalpQuiz!</h3>
+//       <p>Click the link below to verify your email address:</p>
+//       <a href="${verifyUrl}">${verifyUrl}</a>
+//       <p>If you did not request this, ignore this email.</p>
+//     `
+//   });
+//   console.log('✅ Verification email sent successfully to:', email);
+// } catch (mailErr) {
+//   console.error('❌ Email sending error:', mailErr);
+//   return res.status(500).json({
+//     message: 'Signup successful but email could not be sent.',
+//     error: mailErr.message,
+//   });
+// }
+
+// });
+
+//-------------
+// 🟢 Configure Brevo API
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications["api-key"];
+apiKey.apiKey = process.env.BREVO_API_KEY;
+
+// 📨 Helper function to send verification email
+const sendVerificationEmail = async (email, username, verifyUrl) => {
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+  try {
+    await apiInstance.sendTransacEmail({
+      sender: { email: "no-reply@kalpquiz.com", name: "KalpQuiz" },
+      to: [{ email }],
+      subject: "Verify your KalpQuiz email",
+      htmlContent: `
+        <h3>Hi ${username}, Welcome to KalpQuiz!</h3>
+        <p>Click the link below to verify your email:</p>
+        <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
+        <p>If you didn’t request this, please ignore this email.</p>
+      `,
+    });
+    console.log("✅ Verification email sent via Brevo API to:", email);
+  } catch (err) {
+    console.error("❌ Brevo email error:", err.message);
+    throw err;
+  }
+};
+
+// 🧩 Signup route
+router.post("/signup", async (req, res) => {
+  const { email, password, username } = req.body;
+
+  try {
     const exists = await User.findOne({ email });
-    console.log('hello');
-    if (exists) return res.status(400).json({ message: 'Email already exists' });
+    if (exists) return res.status(400).json({ message: "Email already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('📩 Email:', email);
-
-    // ✅ Declare here — outside try block
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    console.log('🔐 Token:', verificationToken);
+    const verificationToken = crypto.randomBytes(32).toString("hex");
 
     const newUser = new User({
       email,
@@ -113,61 +222,23 @@ router.post('/signup', async (req, res) => {
       verificationToken,
       username,
     });
-    console.log('💾 New user:', newUser);
 
     await newUser.save();
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
     const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
-    console.log('📨 Verify link:', verifyUrl);
-  //   try{
-  //   await transporter.sendMail({
-  //     from: '"KalpQuiz" <no-reply@kalpquiz.com>',
-  //     to: email,
-  //     subject: 'Verify your KalpQuiz email',
-  //     html: `
-  //       <h3>${username},Welcome to KalpQuiz!</h3>
-  //       <p>Click the link below to verify your email address:</p>
-  //       <a href="${verifyUrl}">${verifyUrl}</a>
-  //       <p>If you did not request this, ignore this email.</p>
-  //     `
-  //   });
+    console.log("📨 Verify link:", verifyUrl);
 
-  //   res.status(201).json({ message: 'Signup successful! Please verify your email.' });
-  // } catch (err) {
-  //   console.error('❌ Signup error:', err.message);
-  //   res.status(500).json({ message: 'Server error', error: err.message });
-  // }
-  try {
-  await transporter.sendMail({
-    from: '"KalpQuiz" <no-reply@kalpquiz.com>',
-    to: email,
-    subject: 'Verify your KalpQuiz email',
-    html: `
-      <h3>${username}, Welcome to KalpQuiz!</h3>
-      <p>Click the link below to verify your email address:</p>
-      <a href="${verifyUrl}">${verifyUrl}</a>
-      <p>If you did not request this, ignore this email.</p>
-    `
-  });
-  console.log('✅ Verification email sent successfully to:', email);
-} catch (mailErr) {
-  console.error('❌ Email sending error:', mailErr);
-  return res.status(500).json({
-    message: 'Signup successful but email could not be sent.',
-    error: mailErr.message,
-  });
-}
+    // Send email via Brevo API
+    await sendVerificationEmail(email, username, verifyUrl);
 
+    res.status(201).json({ message: "Signup successful! Please verify your email." });
+  } catch (err) {
+    console.error("❌ Signup error:", err.message);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
 });
+
+//----------------------------
 
 
 
