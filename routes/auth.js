@@ -94,7 +94,7 @@ const router = express.Router();
 router.post('/signup', async (req, res) => {
   const { email, password, username } = req.body;
 
-  try {
+  
     const exists = await User.findOne({ email });
     console.log('hello');
     if (exists) return res.status(400).json({ message: 'Email already exists' });
@@ -128,24 +128,45 @@ router.post('/signup', async (req, res) => {
 
     const verifyUrl = `https://kalpquiz-backend.onrender.com/auth/verify?token=${verificationToken}`;
     console.log('📨 Verify link:', verifyUrl);
+  //   try{
+  //   await transporter.sendMail({
+  //     from: '"KalpQuiz" <no-reply@kalpquiz.com>',
+  //     to: email,
+  //     subject: 'Verify your KalpQuiz email',
+  //     html: `
+  //       <h3>${username},Welcome to KalpQuiz!</h3>
+  //       <p>Click the link below to verify your email address:</p>
+  //       <a href="${verifyUrl}">${verifyUrl}</a>
+  //       <p>If you did not request this, ignore this email.</p>
+  //     `
+  //   });
 
-    await transporter.sendMail({
-      from: '"KalpQuiz" <no-reply@kalpquiz.com>',
-      to: email,
-      subject: 'Verify your KalpQuiz email',
-      html: `
-        <h3>${username},Welcome to KalpQuiz!</h3>
-        <p>Click the link below to verify your email address:</p>
-        <a href="${verifyUrl}">${verifyUrl}</a>
-        <p>If you did not request this, ignore this email.</p>
-      `
-    });
+  //   res.status(201).json({ message: 'Signup successful! Please verify your email.' });
+  // } catch (err) {
+  //   console.error('❌ Signup error:', err.message);
+  //   res.status(500).json({ message: 'Server error', error: err.message });
+  // }
+  try {
+  await transporter.sendMail({
+    from: '"KalpQuiz" <no-reply@kalpquiz.com>',
+    to: email,
+    subject: 'Verify your KalpQuiz email',
+    html: `
+      <h3>${username}, Welcome to KalpQuiz!</h3>
+      <p>Click the link below to verify your email address:</p>
+      <a href="${verifyUrl}">${verifyUrl}</a>
+      <p>If you did not request this, ignore this email.</p>
+    `
+  });
+  console.log('✅ Verification email sent successfully to:', email);
+} catch (mailErr) {
+  console.error('❌ Email sending error:', mailErr);
+  return res.status(500).json({
+    message: 'Signup successful but email could not be sent.',
+    error: mailErr.message,
+  });
+}
 
-    res.status(201).json({ message: 'Signup successful! Please verify your email.' });
-  } catch (err) {
-    console.error('❌ Signup error:', err.message);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
 });
 
 
