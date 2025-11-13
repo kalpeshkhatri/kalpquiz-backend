@@ -20,7 +20,11 @@ import createRoomRoute from './routes/RoomOwner.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:1234", "http://127.0.0.1:1234"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 app.use('/kalpquizwebhook',kalpquizwebhook); // must be before json() because in this route we use raw data
 app.use(express.json());
