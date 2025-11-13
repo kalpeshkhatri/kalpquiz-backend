@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
+// import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 dotenv.config();
 
