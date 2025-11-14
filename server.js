@@ -21,7 +21,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: ["http://localhost:1234", "http://127.0.0.1:1234"],
+  origin: ["http://localhost:1234", "http://127.0.0.1:1234",'https://kalpquiz.vercel.app'],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
